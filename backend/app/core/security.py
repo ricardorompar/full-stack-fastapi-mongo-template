@@ -1,3 +1,7 @@
+'''
+Ricardo: I think this is only for hashing and verifying passwords. Nothing to change here. 
+'''
+
 from datetime import datetime, timedelta
 from typing import Any
 
