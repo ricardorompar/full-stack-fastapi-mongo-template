@@ -1,3 +1,6 @@
+# This module does not establish any SQL database connection.
+# No changes required for the switch to ODMantic (MongoDB).
+
 from datetime import datetime, timedelta
 from typing import Any
 

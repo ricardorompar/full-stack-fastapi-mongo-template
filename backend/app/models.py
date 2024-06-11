@@ -1,13 +1,16 @@
-from sqlmodel import Field, Relationship, SQLModel
+# This module has alreday been converted to ODMantic.
 
+from odmantic import Field, Model
+from typing import Optional, List
+from pydantic import EmailStr
 
 # Shared properties
 # TODO replace email str with EmailStr when sqlmodel supports it
-class UserBase(SQLModel):
-    email: str = Field(unique=True, index=True)
+class UserBase(Model):
+    email: EmailStr = Field(unique=True, index=True)
     is_active: bool = True
     is_superuser: bool = False
-    full_name: str | None = None
+    full_name: Optional[str] = None
 
 
 # Properties to receive via API on creation
@@ -16,51 +19,50 @@ class UserCreate(UserBase):
 
 
 # TODO replace email str with EmailStr when sqlmodel supports it
-class UserRegister(SQLModel):
-    email: str
+class UserRegister(Model):
+    email: EmailStr
     password: str
-    full_name: str | None = None
+    full_name: Optional[str] = None
 
 
 # Properties to receive via API on update, all are optional
 # TODO replace email str with EmailStr when sqlmodel supports it
 class UserUpdate(UserBase):
-    email: str | None = None  # type: ignore
-    password: str | None = None
+    email: Optional[EmailStr] = None  # type: ignore
+    password: Optional[str] = None
 
 
 # TODO replace email str with EmailStr when sqlmodel supports it
-class UserUpdateMe(SQLModel):
-    full_name: str | None = None
-    email: str | None = None
+class UserUpdateMe(Model):
+    full_name: Optional[str] = None
+    email: Optional[EmailStr] = None
 
 
-class UpdatePassword(SQLModel):
+class UpdatePassword(Model):
     current_password: str
     new_password: str
 
 
 # Database model, database table inferred from class name
-class User(UserBase, table=True):
-    id: int | None = Field(default=None, primary_key=True)
+class User(UserBase):
     hashed_password: str
-    items: list["Item"] = Relationship(back_populates="owner")
+    items: List["Item"] = Field(default_factory=list)
 
 
 # Properties to return via API, id is always required
 class UserPublic(UserBase):
-    id: int
+    id: str
 
 
-class UsersPublic(SQLModel):
-    data: list[UserPublic]
+class UsersPublic(Model):
+    data: List[UserPublic]
     count: int
 
 
 # Shared properties
-class ItemBase(SQLModel):
+class ItemBase(Model):
     title: str
-    description: str | None = None
+    description: Optional[str] = None
 
 
 # Properties to receive on item creation
@@ -70,44 +72,42 @@ class ItemCreate(ItemBase):
 
 # Properties to receive on item update
 class ItemUpdate(ItemBase):
-    title: str | None = None  # type: ignore
+    title: Optional[str] = None  # type: ignore
 
 
 # Database model, database table inferred from class name
-class Item(ItemBase, table=True):
-    id: int | None = Field(default=None, primary_key=True)
+class Item(ItemBase):
     title: str
-    owner_id: int | None = Field(default=None, foreign_key="user.id", nullable=False)
-    owner: User | None = Relationship(back_populates="items")
+    owner: Optional[User] = Field(references=User)
 
 
 # Properties to return via API, id is always required
 class ItemPublic(ItemBase):
-    id: int
-    owner_id: int
+    id: str
+    owner_id: str
 
 
-class ItemsPublic(SQLModel):
-    data: list[ItemPublic]
+class ItemsPublic(ItemBase):
+    id: List[ItemPublic]
     count: int
 
 
 # Generic message
-class Message(SQLModel):
+class Message(Model):
     message: str
 
 
 # JSON payload containing access token
-class Token(SQLModel):
+class Token(Model):
     access_token: str
     token_type: str = "bearer"
 
 
 # Contents of JWT token
-class TokenPayload(SQLModel):
-    sub: int | None = None
+class TokenPayload(Model):
+    sub: Optional[int] = None
 
 
-class NewPassword(SQLModel):
+class NewPassword(Model):
     token: str
     new_password: str

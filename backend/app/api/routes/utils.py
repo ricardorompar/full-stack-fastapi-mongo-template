@@ -1,3 +1,6 @@
+# This module does not establish any SQL database connection.
+# No changes required for the switch to ODMantic (MongoDB).
+
 from fastapi import APIRouter, Depends
 from pydantic.networks import EmailStr
 
