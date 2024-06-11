@@ -1,3 +1,6 @@
+# This module connects to an SQL database.
+# Changes are required to switch from SQLModel to ODMantic (MongoDB).
+
 from unittest.mock import patch
 
 from fastapi.testclient import TestClient

@@ -1,6 +1,11 @@
+<<<<<<< HEAD
 '''
 Ricardo: I think this is only for hashing and verifying passwords. Nothing to change here. 
 '''
+=======
+# This module does not establish any SQL database connection.
+# No changes required for the switch to ODMantic (MongoDB).
+>>>>>>> 6f0e3f44353526a6557d266152bb2a1ca66de8ad
 
 from datetime import datetime, timedelta
 from typing import Any

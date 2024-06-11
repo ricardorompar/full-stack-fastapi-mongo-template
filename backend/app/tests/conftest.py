@@ -1,3 +1,7 @@
+# This module connects to an SQL database.
+# Changes are required to switch from SQLModel to ODMantic (MongoDB).
+
+
 from collections.abc import Generator
 
 import pytest
