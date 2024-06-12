@@ -1,10 +1,13 @@
-from sqlmodel import Session, create_engine, select
+from odmantic import AIOEngine
+from motor.motor_asyncio import AsyncIOMotorClient
+
 
 from app import crud
 from app.core.config import settings
 from app.models import User, UserCreate
 
-engine = create_engine(str(settings.SQLALCHEMY_DATABASE_URI))
+client = AsyncIOMotorClient(settings.MONGODB_URI)
+engine = AIOEngine(motor_client=client, database=settings.MONGODB_DB)
 
 
 # make sure all SQLModel models are imported (app.models) before initializing DB
@@ -12,23 +15,16 @@ engine = create_engine(str(settings.SQLALCHEMY_DATABASE_URI))
 # for more details: https://github.com/tiangolo/full-stack-fastapi-template/issues/28
 
 
-def init_db(session: Session) -> None:
-    # Tables should be created with Alembic migrations
-    # But if you don't want to use migrations, create
-    # the tables un-commenting the next lines
-    # from sqlmodel import SQLModel
-
-    # from app.core.engine import engine
-    # This works because the models are already imported and registered from app.models
-    # SQLModel.metadata.create_all(engine)
-
-    user = session.exec(
-        select(User).where(User.email == settings.FIRST_SUPERUSER)
-    ).first()
+# Define an asynchronous function to initialize the database
+async def init_db() -> None:
+    # Check if the first superuser already exists
+    user = await crud.get_user_by_email(engine, settings.FIRST_SUPERUSER)
     if not user:
+        # If the user doesn't exist, create a new UserCreate instance
         user_in = UserCreate(
             email=settings.FIRST_SUPERUSER,
             password=settings.FIRST_SUPERUSER_PASSWORD,
             is_superuser=True,
         )
-        user = crud.create_user(session=session, user_create=user_in)
+        # Create the superuser in the database
+        await crud.create_user(engine, user_create=user_in)
