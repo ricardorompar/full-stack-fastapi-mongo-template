@@ -11,11 +11,12 @@ from pydantic import (
     model_validator,
 )
 
-from pydantic_core import MultiHostUrl
-from pydantic_settings import BaseSettings, SettingsConfigDict
-from typing_extensions import Self
+from odmantic import Model  # Importing ODMantic for MongoDB
+from pydantic import AnyUrl, HttpUrl, BeforeValidator  # For URL validations
+from pydantic_settings import BaseSettings, SettingsConfigDict  # For settings management
+from typing_extensions import Self  # For self-referencing types
 
-
+# Helper function to parse CORS settings
 def parse_cors(v: Any) -> list[str] | str:
     if isinstance(v, str) and not v.startswith("["):
         return [i.strip() for i in v.split(",")]
@@ -47,8 +48,8 @@ class Settings(BaseSettings):
         list[AnyUrl] | str, BeforeValidator(parse_cors)
     ] = []
 
-    #PROJECT_NAME: str
-    #SENTRY_DSN: HttpUrl | None = None
+    PROJECT_NAME: str
+    SENTRY_DSN: HttpUrl | None = None
     #POSTGRES_SERVER: str
     #POSTGRES_PORT: int = 5432
     #POSTGRES_USER: str
@@ -99,6 +100,7 @@ class Settings(BaseSettings):
     FIRST_SUPERUSER_PASSWORD: str
     USERS_OPEN_REGISTRATION: bool = False
 
+    # Check for default secret values and raise warnings or errors
     def _check_default_secret(self, var_name: str, value: str | None) -> None:
         if value == "changethis":
             message = (
@@ -110,6 +112,7 @@ class Settings(BaseSettings):
             else:
                 raise ValueError(message)
 
+    # Ensure no default secrets are used in productio
     @model_validator(mode="after")
     def _enforce_non_default_secrets(self) -> Self:
         self._check_default_secret("SECRET_KEY", self.SECRET_KEY)

@@ -1,3 +1,6 @@
+# This module does not establish any SQL database connection.
+# No changes required for the switch to ODMantic (MongoDB).
+
 import sentry_sdk
 from fastapi import FastAPI
 from fastapi.routing import APIRoute
