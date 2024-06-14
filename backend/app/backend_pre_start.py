@@ -2,6 +2,7 @@
 # Changes are required to switch from SQLModel to ODMantic (MongoDB).
 
 import logging
+from models import UserBase
 from odmantic import AIOEngine
 from motor.motor_asyncio import AsyncIOMotorClient
 from tenacity import after_log, before_log, retry, stop_after_attempt, wait_fixed
@@ -11,11 +12,11 @@ from app.core.config import settings
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-max_tries = 60 * 5  # 5 minutes
+max_tries = 1  # 5 minutes
 wait_seconds = 1
 
 client = AsyncIOMotorClient(settings.MONGODB_URI)
-engine = AIOEngine(motor_client=client, database=settings.MONGODB_DB)
+engine = AIOEngine(client=client, database=settings.MONGODB_DB)
 
 
 @retry(
@@ -27,7 +28,9 @@ engine = AIOEngine(motor_client=client, database=settings.MONGODB_DB)
 async def init(db_engine: AIOEngine) -> None:
     try:
         # Try to perform a simple operation to check if DB is awake
-        await db_engine.find_one(User)  # Assuming `User` is one of your models
+        c= await client.app.UserBase.find({}).to_list(100)
+        print(c)
+        await db_engine.find_one(UserBase)  # Assuming `User` is one of your models
     except Exception as e:
         logger.error(e)
         raise e
