@@ -24,8 +24,8 @@ bcrypt = "4.0.1"  # Pin bcrypt until passlib supports the latest
 pydantic-settings = "^2.2.1"
 sentry-sdk = {extras = ["fastapi"], version = "^1.40.6"}
 pyjwt = "^2.8.0"
-odmantic = "^0.4.0"  # Add odmantic dependency
-motor = "^2.4.0"  # Add motor dependency
+odmantic = "^1.0.1" # Add odmantic dependency
+motor =  "^3.4.0" # Add motor dependency
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.4.3"
