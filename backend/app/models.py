@@ -1,6 +1,6 @@
 # This module has alreday been converted to ODMantic.
 
-from odmantic import Field, Model
+from odmantic import Field, Model, ObjectId
 from typing import Optional, List
 from pydantic import EmailStr
 
@@ -51,7 +51,7 @@ class User(UserBase):
 
 # Properties to return via API, id is always required
 class UserPublic(UserBase):
-    id: str
+    puclic_id: str
 
 
 class UsersPublic(Model):
@@ -78,17 +78,17 @@ class ItemUpdate(ItemBase):
 # Database model, database table inferred from class name
 class Item(ItemBase):
     title: str
-    owner: Optional[User] = Field(references=User)
+    owner: Optional[ObjectId] = Field(default=None) #this is supposed to reference to the user // other option: Optional[ObjectId] = Reference()
 
 
 # Properties to return via API, id is always required
 class ItemPublic(ItemBase):
-    id: str
+    itempublic_id: str
     owner_id: str
 
 
 class ItemsPublic(ItemBase):
-    id: List[ItemPublic]
+    itemspublic_id: List[ItemPublic]
     count: int
 
 

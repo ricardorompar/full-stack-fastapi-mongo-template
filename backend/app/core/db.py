@@ -7,7 +7,7 @@ from app.core.config import settings
 from app.models import User, UserCreate
 
 client = AsyncIOMotorClient(settings.MONGODB_URI)
-engine = AIOEngine(motor_client=client, database=settings.MONGODB_DB)
+engine = AIOEngine(client=client, database=settings.MONGODB_DB)
 
 
 # make sure all SQLModel models are imported (app.models) before initializing DB
