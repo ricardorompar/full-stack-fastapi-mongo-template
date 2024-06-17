@@ -4,12 +4,15 @@
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
-from sqlmodel import col, delete, func, select
+#from sqlmodel import col, delete, func, select
+from odmantic import AIOEngine, ObjectId
+from fastapi import APIRouter, Depends, HTTPException
+
 
 from app import crud
 from app.api.deps import (
     CurrentUser,
-    SessionDep,
+    EngineDep,
     get_current_active_superuser,
 )
 from app.core.config import settings
@@ -36,35 +39,34 @@ router = APIRouter()
     dependencies=[Depends(get_current_active_superuser)],
     response_model=UsersPublic,
 )
-def read_users(session: SessionDep, skip: int = 0, limit: int = 100) -> Any:
+
+
+async def read_users(engine: EngineDep, skip: int = 0, limit: int = 100) -> Any:
     """
     Retrieve users.
     """
 
-    count_statement = select(func.count()).select_from(User)
-    count = session.exec(count_statement).one()
-
-    statement = select(User).offset(skip).limit(limit)
-    users = session.exec(statement).all()
-
+    count = await engine.count(User)
+    users = await engine.find(User, skip=skip, limit=limit)
     return UsersPublic(data=users, count=count)
 
 
 @router.post(
     "/", dependencies=[Depends(get_current_active_superuser)], response_model=UserPublic
 )
-def create_user(*, session: SessionDep, user_in: UserCreate) -> Any:
+async def create_user(*, engine: EngineDep, user_in: UserCreate) -> Any:
     """
     Create new user.
     """
-    user = crud.get_user_by_email(session=session, email=user_in.email)
+    user = await crud.get_user_by_email(engine=engine, email=user_in.email)
     if user:
         raise HTTPException(
             status_code=400,
             detail="The user with this email already exists in the system.",
         )
 
-    user = crud.create_user(session=session, user_create=user_in)
+    user = await crud.create_user(engine=engine, user_create=user_in)
+    
     if settings.emails_enabled and user_in.email:
         email_data = generate_new_account_email(
             email_to=user_in.email, username=user_in.email, password=user_in.password
@@ -76,32 +78,38 @@ def create_user(*, session: SessionDep, user_in: UserCreate) -> Any:
         )
     return user
 
+ 
 
 @router.patch("/me", response_model=UserPublic)
-def update_user_me(
-    *, session: SessionDep, user_in: UserUpdateMe, current_user: CurrentUser
+async def update_user_me(
+    *, engine: EngineDep, user_in: UserUpdateMe, current_user: CurrentUser
 ) -> Any:
     """
     Update own user.
     """
 
     if user_in.email:
-        existing_user = crud.get_user_by_email(session=session, email=user_in.email)
+        existing_user = await crud.get_user_by_email(engine=engine, email=user_in.email)
         if existing_user and existing_user.id != current_user.id:
             raise HTTPException(
                 status_code=409, detail="User with this email already exists"
             )
-    user_data = user_in.model_dump(exclude_unset=True)
-    current_user.sqlmodel_update(user_data)
-    session.add(current_user)
-    session.commit()
-    session.refresh(current_user)
+    #user_data = user_in.model_dump(exclude_unset=True)
+    user_data = user_in.dict(exclude_unset=True)
+    # current_user.sqlmodel_update(user_data)
+
+    for key, value in user_data.items():
+        setattr(current_user, key, value)
+    
+    await engine.save(current_user)
+    current_user = await engine.find_one(User, User.id == current_user.id)
+    
     return current_user
 
 
 @router.patch("/me/password", response_model=Message)
-def update_password_me(
-    *, session: SessionDep, body: UpdatePassword, current_user: CurrentUser
+async def update_password_me(
+    *, engine: EngineDep, body: UpdatePassword, current_user: CurrentUser
 ) -> Any:
     """
     Update own password.
@@ -114,13 +122,13 @@ def update_password_me(
         )
     hashed_password = get_password_hash(body.new_password)
     current_user.hashed_password = hashed_password
-    session.add(current_user)
-    session.commit()
+    await engine.save(current_user)
+
     return Message(message="Password updated successfully")
 
 
 @router.get("/me", response_model=UserPublic)
-def read_user_me(current_user: CurrentUser) -> Any:
+async def read_user_me(current_user: CurrentUser) -> Any:
     """
     Get current user.
     """
@@ -128,7 +136,7 @@ def read_user_me(current_user: CurrentUser) -> Any:
 
 
 @router.delete("/me", response_model=Message)
-def delete_user_me(session: SessionDep, current_user: CurrentUser) -> Any:
+async def delete_user_me(engine: EngineDep, current_user: CurrentUser) -> Any:
     """
     Delete own user.
     """
@@ -136,15 +144,15 @@ def delete_user_me(session: SessionDep, current_user: CurrentUser) -> Any:
         raise HTTPException(
             status_code=403, detail="Super users are not allowed to delete themselves"
         )
-    statement = delete(Item).where(col(Item.owner_id) == current_user.id)
-    session.exec(statement)  # type: ignore
-    session.delete(current_user)
-    session.commit()
+
+    await engine.remove(Item, Item.owner_id == current_user.id)
+    await engine.delete(current_user)
+
     return Message(message="User deleted successfully")
 
 
 @router.post("/signup", response_model=UserPublic)
-def register_user(session: SessionDep, user_in: UserRegister) -> Any:
+async def register_user(engine: EngineDep, user_in: UserRegister) -> Any:
     """
     Create new user without the need to be logged in.
     """
@@ -153,16 +161,21 @@ def register_user(session: SessionDep, user_in: UserRegister) -> Any:
             status_code=403,
             detail="Open user registration is forbidden on this server",
         )
-    user = crud.get_user_by_email(session=session, email=user_in.email)
+    user = await crud.get_user_by_email(engine=engine, email=user_in.email)
     if user:
         raise HTTPException(
             status_code=400,
             detail="The user with this email already exists in the system",
         )
-    user_create = UserCreate.model_validate(user_in)
-    user = crud.create_user(session=session, user_create=user_create)
+    #user_create = UserCreate.model_validate(user_in)
+    #user = await crud.create_user(engine=engine, user_create=user_create)
+    #return user
+    user_create = UserCreate(**user_in.dict())
+    user = User(**user_create.dict())
+    await engine.save(user)
     return user
 
+#... to be continued
 
 @router.get("/{user_id}", response_model=UserPublic)
 def read_user_by_id(
