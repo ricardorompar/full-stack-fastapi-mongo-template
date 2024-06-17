@@ -16,7 +16,7 @@ engine = AIOEngine(client=client, database=settings.MONGODB_DB)
 
 
 # Define an asynchronous function to initialize the database
-async def init_db() -> None:
+async def init_db(engine) -> None:
     # Check if the first superuser already exists
     user = await crud.get_user_by_email(engine, settings.FIRST_SUPERUSER)
     if not user:

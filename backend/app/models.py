@@ -4,6 +4,7 @@ from odmantic import Field, Model, ObjectId
 from typing import Optional, List
 from pydantic import EmailStr
 
+
 # Shared properties
 # TODO replace email str with EmailStr when sqlmodel supports it
 class UserBase(Model):
@@ -45,6 +46,7 @@ class UpdatePassword(Model):
 
 # Database model, database table inferred from class name
 class User(UserBase):
+    email: EmailStr
     hashed_password: str
     items: List["Item"] = Field(default_factory=list)
 
@@ -78,7 +80,9 @@ class ItemUpdate(ItemBase):
 # Database model, database table inferred from class name
 class Item(ItemBase):
     title: str
-    owner: Optional[ObjectId] = Field(default=None) #this is supposed to reference to the user // other option: Optional[ObjectId] = Reference()
+    owner: Optional[ObjectId] = Field(
+        default=None
+    )  # this is supposed to reference to the user // other option: Optional[ObjectId] = Reference()
 
 
 # Properties to return via API, id is always required

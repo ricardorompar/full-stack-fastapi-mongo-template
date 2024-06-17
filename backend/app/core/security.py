@@ -1,8 +1,7 @@
-<<<<<<< HEAD
-'''
+"""
 Ricardo: I think this is only for hashing and verifying passwords. Nothing to change here. 
-'''
-=======
+"""
+
 # This module does not establish any SQL database connection.
 # No changes required for the switch to ODMantic (MongoDB).
 
