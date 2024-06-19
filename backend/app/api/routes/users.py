@@ -178,13 +178,13 @@ async def register_user(engine: EngineDep, user_in: UserRegister) -> Any:
 #... to be continued
 
 @router.get("/{user_id}", response_model=UserPublic)
-def read_user_by_id(
-    user_id: int, session: SessionDep, current_user: CurrentUser
+async def read_user_by_id(
+    user_id: int, engine: EngineDep, current_user: CurrentUser
 ) -> Any:
     """
     Get a specific user by id.
     """
-    user = session.get(User, user_id)
+    user = await engine.find_one(User, User.id == ObjectId(user_id))
     if user == current_user:
         return user
     if not current_user.is_superuser:
@@ -200,9 +200,9 @@ def read_user_by_id(
     dependencies=[Depends(get_current_active_superuser)],
     response_model=UserPublic,
 )
-def update_user(
+async def update_user(
     *,
-    session: SessionDep,
+    engine: EngineDep,
     user_id: int,
     user_in: UserUpdate,
 ) -> Any:
@@ -210,39 +210,37 @@ def update_user(
     Update a user.
     """
 
-    db_user = session.get(User, user_id)
+    db_user = await engine.find_one(User, User.id == ObjectId(user_id))
     if not db_user:
         raise HTTPException(
             status_code=404,
             detail="The user with this id does not exist in the system",
         )
     if user_in.email:
-        existing_user = crud.get_user_by_email(session=session, email=user_in.email)
+        existing_user = await crud.get_user_by_email(engine=engine, email=user_in.email)
         if existing_user and existing_user.id != user_id:
             raise HTTPException(
                 status_code=409, detail="User with this email already exists"
             )
 
-    db_user = crud.update_user(session=session, db_user=db_user, user_in=user_in)
+    db_user = await crud.update_user(engine=engine, db_user=db_user, user_in=user_in)
     return db_user
 
 
 @router.delete("/{user_id}", dependencies=[Depends(get_current_active_superuser)])
-def delete_user(
-    session: SessionDep, current_user: CurrentUser, user_id: int
+async def delete_user(
+    engine: EngineDep, current_user: CurrentUser, user_id: int
 ) -> Message:
     """
     Delete a user.
     """
-    user = session.get(User, user_id)
+    user = await engine.find_one(User, User.id == ObjectId(user_id))
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     if user == current_user:
         raise HTTPException(
             status_code=403, detail="Super users are not allowed to delete themselves"
         )
-    statement = delete(Item).where(col(Item.owner_id) == user_id)
-    session.exec(statement)  # type: ignore
-    session.delete(user)
-    session.commit()
+    await engine.remove(Item, Item.owner_id == ObjectId(user_id))
+    await engine.delete(user)
     return Message(message="User deleted successfully")
