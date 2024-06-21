@@ -45,8 +45,15 @@ class UpdatePassword(Model):
 
 
 # Database model, database table inferred from class name
-class User(UserBase):
-    email: EmailStr
+class User(Model): #previously: class User(UserBase):
+    #Taking the UserBase attributes:
+    email: EmailStr = Field(unique=True, index=True)
+    is_active: bool = True
+    is_superuser: bool = False
+    full_name: Optional[str] = None
+    #Stuff that was already here:
+    #email: EmailStr
+    #This change is done so that we inherit the Model class directly 
     hashed_password: str
     items: List["Item"] = Field(default_factory=list)
 

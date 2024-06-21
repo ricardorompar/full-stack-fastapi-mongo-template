@@ -8,7 +8,7 @@ from typing import Any
 # from sqlmodel import Session, select
 from odmantic import AIOEngine, Model, query
 from app.core.security import get_password_hash, verify_password
-from app.models import Item, ItemCreate, User, UserCreate, UserUpdate
+from app.models import Item, ItemCreate, User, UserCreate, UserUpdate, UserBase
 from odmantic import SyncEngine
 from typing import Union
 
@@ -39,9 +39,9 @@ def update_user(*, engine: SyncEngine, db_user: User, user_in: UserUpdate) -> An
     return db_user
 
 
-def get_user_by_email(engine: AIOEngine, email: str) -> User | None:
-
+async def get_user_by_email(engine: SyncEngine, email: str) -> User | None:
     session_user = engine.find_one(User, query.eq(User.email, email))
+    # session_user = await engine.find_one(UserBase)
     return session_user
 
 
