@@ -1,5 +1,5 @@
 from typing import Any, Union
-from odmantic import AIOEngine, Model, query
+from odmantic import AIOEngine, Model, query, SyncEngine
 from app.core.security import get_password_hash, verify_password
 from app.models import Item, ItemCreate, User, UserCreate, UserUpdate
 
