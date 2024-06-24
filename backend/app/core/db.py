@@ -39,5 +39,3 @@ async def init_db(engine: AIOEngine) -> None:
         )
         await crud.create_user(engine=engine, user_create=user_in)
 
-# Run the init_db function
-#asyncio.run(init_db(engine))
