@@ -1,6 +1,3 @@
-"""
-Ricardo: I think this is only for hashing and verifying passwords. Nothing to change here. 
-"""
 
 # This module does not establish any SQL database connection.
 # No changes required for the switch to ODMantic (MongoDB).
@@ -20,7 +17,7 @@ ALGORITHM = "HS256"
 
 
 def create_access_token(subject: str | Any, expires_delta: timedelta) -> str:
-    expire = datetime.utcnow() + expires_delta
+    expire = datetime.now(datetime.UTC) + expires_delta
     to_encode = {"exp": expire, "sub": str(subject)}
     encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
