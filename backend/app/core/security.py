@@ -1,4 +1,3 @@
-
 # This module does not establish any SQL database connection.
 # No changes required for the switch to ODMantic (MongoDB).
 
@@ -9,15 +8,22 @@ import jwt
 from passlib.context import CryptContext
 
 from app.core.config import settings
+import logging
+from datetime import datetime, timezone
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 ALGORITHM = "HS256"
+logger = logging.getLogger(__name__)
 
 
 def create_access_token(subject: str | Any, expires_delta: timedelta) -> str:
-    expire = datetime.now(datetime.UTC) + expires_delta
+    now = datetime.now(timezone.utc)
+    expire = now + expires_delta
+    logger.info(f"Token created at {now}, expires at {expire}")
+    logger.info(f"Expires delta: {expires_delta}")
+    logger.info(f"Subject: {subject}")
     to_encode = {"exp": expire, "sub": str(subject)}
     encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt

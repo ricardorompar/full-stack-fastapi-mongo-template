@@ -11,8 +11,9 @@ from app.core.db import init_db
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# MONGODB_URI = "mongodb+srv://admin:admin1234!@cluster0.ba2wonq.mongodb.net/test-db?retryWrites=true&w=majority&appName=Cluster0"
-MONGODB_URI = "db"
+MONGODB_URI = (
+    "mongodb+srv://admin:admin1234!@cluster0.ba2wonq.mongodb.net/?appName=Cluster0"
+)
 
 # Setup the MongoDB client and engine
 

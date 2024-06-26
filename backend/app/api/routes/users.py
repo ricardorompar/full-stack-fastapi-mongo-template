@@ -4,9 +4,10 @@
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
-#from sqlmodel import col, delete, func, select
+
+# from sqlmodel import col, delete, func, select
 from odmantic import AIOEngine, ObjectId
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 
 
 from app import crud
@@ -30,7 +31,9 @@ from app.models import (
     UserUpdateMe,
 )
 from app.utils import generate_new_account_email, send_email
+import logging
 
+logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
@@ -39,8 +42,6 @@ router = APIRouter()
     dependencies=[Depends(get_current_active_superuser)],
     response_model=UsersPublic,
 )
-
-
 async def read_users(engine: EngineDep, skip: int = 0, limit: int = 100) -> Any:
     """
     Retrieve users.
@@ -66,7 +67,7 @@ async def create_user(*, engine: EngineDep, user_in: UserCreate) -> Any:
         )
 
     user = await crud.create_user(engine=engine, user_create=user_in)
-    
+
     if settings.emails_enabled and user_in.email:
         email_data = generate_new_account_email(
             email_to=user_in.email, username=user_in.email, password=user_in.password
@@ -78,7 +79,6 @@ async def create_user(*, engine: EngineDep, user_in: UserCreate) -> Any:
         )
     return user
 
- 
 
 @router.patch("/me", response_model=UserPublic)
 async def update_user_me(
@@ -94,16 +94,16 @@ async def update_user_me(
             raise HTTPException(
                 status_code=409, detail="User with this email already exists"
             )
-    #user_data = user_in.model_dump(exclude_unset=True)
+    # user_data = user_in.model_dump(exclude_unset=True)
     user_data = user_in.dict(exclude_unset=True)
     # current_user.sqlmodel_update(user_data)
 
     for key, value in user_data.items():
         setattr(current_user, key, value)
-    
+
     await engine.save(current_user)
     current_user = await engine.find_one(User, User.id == current_user.id)
-    
+
     return current_user
 
 
@@ -132,7 +132,16 @@ async def read_user_me(current_user: CurrentUser) -> Any:
     """
     Get current user.
     """
-    return current_user
+    try:
+        logger.info(f"Current user: {current_user}")
+        return current_user
+    except Exception as e:
+        logger.error(f"Error occurred while fetching current user: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Could not fetch current user",
+        )
+    # return current_user
 
 
 @router.delete("/me", response_model=Message)
@@ -167,15 +176,17 @@ async def register_user(engine: EngineDep, user_in: UserRegister) -> Any:
             status_code=400,
             detail="The user with this email already exists in the system",
         )
-    #user_create = UserCreate.model_validate(user_in)
-    #user = await crud.create_user(engine=engine, user_create=user_create)
-    #return user
+    # user_create = UserCreate.model_validate(user_in)
+    # user = await crud.create_user(engine=engine, user_create=user_create)
+    # return user
     user_create = UserCreate(**user_in.dict())
     user = User(**user_create.dict())
     await engine.save(user)
     return user
 
-#... to be continued
+
+# ... to be continued
+
 
 @router.get("/{user_id}", response_model=UserPublic)
 async def read_user_by_id(
