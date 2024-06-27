@@ -60,7 +60,8 @@ class User(Model): #previously: class User(UserBase):
 
 # Properties to return via API, id is always required
 class UserPublic(UserBase):
-    public_id: str
+    #public_id: str
+    pass
 
 
 class UsersPublic(Model):
