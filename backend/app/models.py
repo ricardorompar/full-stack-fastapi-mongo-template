@@ -60,7 +60,7 @@ class User(Model): #previously: class User(UserBase):
 
 # Properties to return via API, id is always required
 class UserPublic(UserBase):
-    puclic_id: str
+    public_id: str
 
 
 class UsersPublic(Model):
@@ -116,7 +116,7 @@ class Token(Model):
 
 # Contents of JWT token
 class TokenPayload(Model):
-    sub: Optional[int] = None
+    sub: Optional[str] = None
 
 
 class NewPassword(Model):

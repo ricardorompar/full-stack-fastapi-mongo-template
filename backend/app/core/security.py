@@ -11,6 +11,8 @@ from app.core.config import settings
 import logging
 from datetime import datetime, timezone
 
+from typing import Union, Any
+
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
@@ -18,14 +20,15 @@ ALGORITHM = "HS256"
 logger = logging.getLogger(__name__)
 
 
-def create_access_token(subject: str | Any, expires_delta: timedelta) -> str:
-    now = datetime.now(timezone.utc)
-    expire = now + expires_delta
-    logger.info(f"Token created at {now}, expires at {expire}")
-    logger.info(f"Expires delta: {expires_delta}")
-    logger.info(f"Subject: {subject}")
+def create_access_token(subject: Union[str, Any], expires_delta: timedelta = None) -> str:
+    if expires_delta:
+        expire = datetime.utcnow() + expires_delta
+    else:
+        expire = datetime.utcnow() + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     to_encode = {"exp": expire, "sub": str(subject)}
-    encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=ALGORITHM)
+    encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+    logger.info(f"Token created at {datetime.utcnow()}, expires at {expire}")
+    logger.info(f"Subject: {subject}")
     return encoded_jwt
 
 

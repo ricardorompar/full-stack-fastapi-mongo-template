@@ -128,20 +128,25 @@ async def update_password_me(
 
 
 @router.get("/me", response_model=UserPublic)
-async def read_user_me(current_user: CurrentUser) -> Any:
+async def read_users_me(current_user: CurrentUser) -> UserPublic:
     """
     Get current user.
     """
     try:
         logger.info(f"Current user: {current_user}")
-        return current_user
+        return UserPublic(
+            email=current_user.email,
+            is_active=current_user.is_active,
+            is_superuser=current_user.is_superuser,
+            full_name=current_user.full_name,
+            public_id=str(current_user.id),  # Convert ObjectId to string
+        )
     except Exception as e:
         logger.error(f"Error occurred while fetching current user: {e}")
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Could not fetch current user",
         )
-    # return current_user
 
 
 @router.delete("/me", response_model=Message)
