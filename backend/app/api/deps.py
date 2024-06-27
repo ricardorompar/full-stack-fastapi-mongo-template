@@ -45,9 +45,6 @@ async def get_current_user(engine: EngineDep, token: TokenDep) -> User:
             token, settings.SECRET_KEY, algorithms=[security.ALGORITHM]
         )
         logger.info(f"Decoded payload: {payload}")
-        logger.info(
-            f"Token expiration inform: {datetime.fromtimestamp(payload['exp'], tz=timezone.utc)}"
-        )
         token_data = TokenPayload(**payload)
     except (InvalidTokenError, ValidationError) as e:
         logger.error(f"Token validation error: {e}")

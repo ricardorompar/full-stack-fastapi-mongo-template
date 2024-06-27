@@ -1,5 +1,4 @@
 services:
-
   proxy:
     image: traefik:v2.3
     volumes:
@@ -39,11 +38,6 @@ services:
     networks:
       - traefik-public
       - default
-
-  db:
-    restart: "no"
-    ports:
-      - "5432:5432"
 
   adminer:
     restart: "no"
