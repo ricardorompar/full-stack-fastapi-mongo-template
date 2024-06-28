@@ -28,7 +28,8 @@ engine = AIOEngine(client=client, database=settings.MONGODB_DB)
 async def init(db_engine: AIOEngine) -> None:
     try:
         # Try to perform a simple operation to check if DB is awake
-        test = await db_engine.find_one(UserBase)
+        test = await db_engine.find_one(UserBase) 
+        print(test)
     except Exception as e:
         logger.error(e)
         raise e

@@ -86,11 +86,17 @@ class ItemUpdate(ItemBase):
 
 
 # Database model, database table inferred from class name
-class Item(ItemBase):
+class Item(Model):
+    #Directly passing the ItemBase attributes:
+    title: str
+    description: Optional[str] = None
+    #The rest
     title: str
     owner: Optional[ObjectId] = Field(
         default=None
-    )  # this is supposed to reference to the user // other option: Optional[ObjectId] = Reference()
+    )  
+    owner_id: str 
+    # this is supposed to reference to the user // other option: Optional[ObjectId] = Reference()
 
 
 # Properties to return via API, id is always required
