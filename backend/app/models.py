@@ -109,12 +109,8 @@ class ItemPublic(Model):
     owner_id: ObjectId #also here
 
 
-class ItemsPublic(Model):
-    #Directly passing the ItemBase attributes:
-    title: str
-    description: Optional[str] = None
-    #The rest
-    itemspublic_id: List[ItemPublic]
+class ItemsPublic(BaseModel):
+    items: List[ItemPublic]
     count: int
 
 

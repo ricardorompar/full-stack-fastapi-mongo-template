@@ -39,10 +39,10 @@ services:
       - traefik-public
       - default
 
-  adminer:
-    restart: "no"
-    ports:
-      - "8080:8080"
+  # adminer:
+  #   restart: "no"
+  #   ports:
+  #     - "8080:8080"
 
   backend:
     restart: "no"
