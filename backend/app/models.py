@@ -99,12 +99,20 @@ class Item(Model):
 
 
 # Properties to return via API, id is always required
-class ItemPublic(ItemBase):
+class ItemPublic(Model):
+    #Directly passing the ItemBase attributes:
+    title: str
+    description: Optional[str] = None
+    #The rest
     # itempublic_id: ObjectId #BEWARE
     owner_id: ObjectId #also here
 
 
-class ItemsPublic(ItemBase):
+class ItemsPublic(Model):
+    #Directly passing the ItemBase attributes:
+    title: str
+    description: Optional[str] = None
+    #The rest
     itemspublic_id: List[ItemPublic]
     count: int
 
