@@ -60,8 +60,7 @@ class User(Model): #previously: class User(UserBase):
 
 # Properties to return via API, id is always required
 class UserPublic(UserBase):
-    #public_id: str
-    pass
+    public_id: ObjectId #this is the type of ID that odmantic assigns
 
 
 class UsersPublic(Model):
@@ -95,14 +94,14 @@ class Item(Model):
     owner: Optional[ObjectId] = Field(
         default=None
     )  
-    owner_id: str 
+    owner_id: ObjectId 
     # this is supposed to reference to the user // other option: Optional[ObjectId] = Reference()
 
 
 # Properties to return via API, id is always required
 class ItemPublic(ItemBase):
-    itempublic_id: str
-    owner_id: str
+    # itempublic_id: ObjectId #BEWARE
+    owner_id: ObjectId #also here
 
 
 class ItemsPublic(ItemBase):
