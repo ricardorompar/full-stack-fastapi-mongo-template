@@ -3,6 +3,7 @@ from odmantic import AIOEngine, Model, query, SyncEngine
 from app.core.security import get_password_hash, verify_password
 from app.models import Item, ItemCreate, User, UserCreate, UserUpdate
 
+import logging
 
 async def create_user(*, engine: AIOEngine, user_create: UserCreate) -> User:
     # Create a User object and hash the password
@@ -28,12 +29,19 @@ async def update_user(*, engine: AIOEngine, db_user: User, user_in: UserUpdate) 
 
     await engine.save(db_user)  # Equivalent to session.add(db_user) and session.commit()
     return db_user
-
+logger = logging.getLogger(__name__)
 
 async def get_user_by_email(engine: AIOEngine, email: str) -> Union[User, None]:
-    session_user = await engine.find_one(User, User.email == email)
-    return session_user
-
+    try:
+        session_user = await engine.find_one(User, User.email == email)
+        if session_user:
+            logger.info(f"User found: {session_user.email}")
+        else:
+            logger.info(f"No user found with email: {email}")
+        return session_user
+    except Exception as e:  # Catching a more general exception for demonstration
+        logger.error(f"Error retrieving user by email {email}: {e}")
+        return None
 
 async def authenticate(*, engine: AIOEngine, email: str, password: str) -> Union[User, None]:
     db_user = await get_user_by_email(engine=engine, email=email)
