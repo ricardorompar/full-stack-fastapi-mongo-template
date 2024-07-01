@@ -3,6 +3,7 @@
 from odmantic import Field, Model, ObjectId
 from typing import Optional, List
 from pydantic import EmailStr
+from pydantic import BaseModel
 
 
 # Shared properties
@@ -104,8 +105,8 @@ class ItemPublic(ItemBase):
     owner_id: ObjectId #also here
 
 
-class ItemsPublic(ItemBase):
-    itemspublic_id: List[ItemPublic]
+class ItemsPublic(BaseModel):
+    items: List[ItemPublic]
     count: int
 
 

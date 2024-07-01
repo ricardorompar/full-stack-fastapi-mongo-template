@@ -1,94 +1,101 @@
-# This module connects to an SQL database.
-# Changes are required to switch from SQLModel to ODMantic (MongoDB).
-# This module manages CRUD (Create, Read, Update, Delete) operations for items, 
-# ensuring proper user authentication and authorization.
+# This module connects to a MongoDB database using ODMantic.
+# It manages CRUD operations for items ensuring proper user authentication and authorization.
 
-
-from typing import Any
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from odmantic import AIOEngine, ObjectId
-
-from app.api.deps import CurrentUser, EngineDep
-from app.models import Item, ItemCreate, ItemPublic, ItemsPublic, ItemUpdate, Message
+from typing import List, Optional
+from app.api.deps import get_current_user, get_db
+from app.models import Item, ItemCreate, ItemPublic, ItemsPublic, ItemUpdate, Message, User
 
 router = APIRouter()
-
 @router.get("/", response_model=ItemsPublic)
 async def read_items(
-     engine: EngineDep, current_user: CurrentUser, skip: int = 0, limit: int = 100
-) -> Any:
-   
+    engine: AIOEngine = Depends(get_db), 
+    current_user: User = Depends(get_current_user), 
+    skip: int = 0, 
+    limit: int = 100
+) -> ItemsPublic:
     """
-    Retrieve items.
+    Retrieve items accessible by the current user.
     """
+    query = {}
+    if not current_user.is_superuser:
+        query = {"owner_id": current_user.id}
 
-    if current_user.is_superuser:
-        count = await engine.count(Item)
-        items = await engine.find(Item, skip=skip, limit=limit)
-    else:
-        count = await engine.count(Item, Item.owner_id == ObjectId(current_user.id))
-        items = await engine.find(Item, Item.owner_id == ObjectId(current_user.id), skip=skip, limit=limit)
-    return ItemsPublic(data=items, count=count)
+    items = await engine.find(Item, query, skip=skip, limit=limit)
+    count = await engine.count(Item, query)
 
+    # Convert database items to ItemPublic objects
+    items_public = [ItemPublic(**item.dict()) for item in items]
 
+    return ItemsPublic(items=items_public, count=count)
 
-@router.get("/{id}", response_model=ItemPublic)
-async def read_item(engine: EngineDep, current_user: CurrentUser, id: int) -> Any:
+@router.get("/{item_id}", response_model=ItemPublic)
+async def read_item(
+    item_id: str, 
+    engine: AIOEngine = Depends(get_db), 
+    current_user: User = Depends(get_current_user)
+) -> ItemPublic:
     """
     Get item by ID.
     """
-    item = await engine.find_one(Item, Item.id == ObjectId(id))
+    item = await engine.find_one(Item, Item.id == ObjectId(item_id))
     if not item:
         raise HTTPException(status_code=404, detail="Item not found")
-    if not current_user.is_superuser and (item.owner_id != current_user.id):
-        raise HTTPException(status_code=400, detail="Not enough permissions")
-    return item
 
+    if not current_user.is_superuser and item.owner_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not enough permissions to access this item")
+
+    return item
 
 @router.post("/", response_model=ItemPublic)
 async def create_item(
-    *, engine: EngineDep, current_user: CurrentUser, item_in: ItemCreate
-) -> Any:
+    item_in: ItemCreate, 
+    engine: AIOEngine = Depends(get_db), 
+    current_user: User = Depends(get_current_user)
+) -> ItemPublic:
     """
-    Create new item.
+    Create a new item.
     """
-    item = Item(**item_in.dict(), owner_id=ObjectId(current_user.id))
+    item = Item(**item_in.dict(), owner_id=current_user.id)
     await engine.save(item)
-    item = await engine.find_one(Item, Item.id == item.id)
     return item
-    
 
-
-@router.put("/{id}", response_model=ItemPublic)
+@router.put("/{item_id}", response_model=ItemPublic)
 async def update_item(
-    *, engine: EngineDep, current_user: CurrentUser, id: int, item_in: ItemUpdate
-) -> Any:
+    item_id: str, 
+    item_in: ItemUpdate, 
+    engine: AIOEngine = Depends(get_db), 
+    current_user: User = Depends(get_current_user)
+) -> ItemPublic:
     """
     Update an item.
     """
-    item = await engine.find_one(Item, Item.id == ObjectId(id))
+    item = await engine.find_one(Item, Item.id == ObjectId(item_id))
     if not item:
         raise HTTPException(status_code=404, detail="Item not found")
-    if not current_user.is_superuser and (item.owner_id != current_user.id):
-        raise HTTPException(status_code=400, detail="Not enough permissions")
-    update_dict = item_in.dict(exclude_unset=True)
-    for key, value in update_dict.items():
+    if not current_user.is_superuser and item.owner_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not enough permissions to modify this item")
+
+    for key, value in item_in.dict(exclude_unset=True).items():
         setattr(item, key, value)
     await engine.save(item)
-    item = await engine.find_one(Item, Item.id == item.id)
     return item
 
-
-@router.delete("/{id}")
-async def delete_item(engine: EngineDep, current_user: CurrentUser, id: int) -> Message:
+@router.delete("/{item_id}")
+async def delete_item(
+    item_id: str, 
+    engine: AIOEngine = Depends(get_db), 
+    current_user: User = Depends(get_current_user)
+) -> Message:
     """
     Delete an item.
     """
-    
-    item = await engine.find_one(Item, Item.id == ObjectId(id))
+    item = await engine.find_one(Item, Item.id == ObjectId(item_id))
     if not item:
         raise HTTPException(status_code=404, detail="Item not found")
-    if not current_user.is_superuser and (item.owner_id != current_user.id):
-        raise HTTPException(status_code=400, detail="Not enough permissions")
+    if not current_user.is_superuser and item.owner_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not enough permissions to delete this item")
+
     await engine.delete(item)
     return Message(message="Item deleted successfully")
