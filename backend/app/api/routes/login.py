@@ -36,7 +36,6 @@ async def login_access_token(
     user = await crud.authenticate(
         engine=engine, email=form_data.username, password=form_data.password
     )
-    print("hello ricardo----------------------------------------", user)
     if not user:
         raise HTTPException(status_code=400, detail="Incorrect email or password")
     elif not user.is_active:

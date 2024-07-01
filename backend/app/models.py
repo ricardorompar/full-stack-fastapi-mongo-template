@@ -109,17 +109,12 @@ class ItemPublic(Model):
     owner_id: ObjectId #also here
 
 
-<<<<<<< HEAD
 class ItemsPublic(Model):
     #Directly passing the ItemBase attributes:
     title: str
     description: Optional[str] = None
     #The rest
     itemspublic_id: List[ItemPublic]
-=======
-class ItemsPublic(BaseModel):
-    items: List[ItemPublic]
->>>>>>> c20c89d31cc03fdadf3c546be2fbf40c8994bd1c
     count: int
 
 
