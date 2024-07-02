@@ -10,29 +10,30 @@ import {
   Th,
   Thead,
   Tr,
-} from "@chakra-ui/react"
-import { useSuspenseQuery } from "@tanstack/react-query"
-import { createFileRoute } from "@tanstack/react-router"
+} from "@chakra-ui/react";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { createFileRoute } from "@tanstack/react-router";
 
-import { Suspense } from "react"
-import { ErrorBoundary } from "react-error-boundary"
-import { ItemsService } from "../../client"
-import ActionsMenu from "../../components/Common/ActionsMenu"
-import Navbar from "../../components/Common/Navbar"
+import { Suspense } from "react";
+import { ErrorBoundary } from "react-error-boundary";
+import { ItemsService } from "../../client";
+import ActionsMenu from "../../components/Common/ActionsMenu";
+import Navbar from "../../components/Common/Navbar";
 
 export const Route = createFileRoute("/_layout/items")({
   component: Items,
-})
+});
 
 function ItemsTableBody() {
-  const { data: items } = useSuspenseQuery({
+  const { data } = useSuspenseQuery({
     queryKey: ["items"],
     queryFn: () => ItemsService.readItems({}),
-  })
+  });
+  const { items } = data;
 
   return (
     <Tbody>
-      {items.data.map((item) => (
+      {items.map((item) => (
         <Tr key={item.id}>
           <Td>{item.id}</Td>
           <Td>{item.title}</Td>
@@ -45,7 +46,7 @@ function ItemsTableBody() {
         </Tr>
       ))}
     </Tbody>
-  )
+  );
 }
 function ItemsTable() {
   return (
@@ -90,7 +91,7 @@ function ItemsTable() {
         </ErrorBoundary>
       </Table>
     </TableContainer>
-  )
+  );
 }
 
 function Items() {
@@ -103,5 +104,5 @@ function Items() {
       <Navbar type={"Item"} />
       <ItemsTable />
     </Container>
-  )
+  );
 }
