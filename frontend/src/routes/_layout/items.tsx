@@ -25,15 +25,14 @@ export const Route = createFileRoute("/_layout/items")({
 });
 
 function ItemsTableBody() {
-  const { data } = useSuspenseQuery({
+  const { data: items } = useSuspenseQuery({
     queryKey: ["items"],
     queryFn: () => ItemsService.readItems({}),
   });
-  const { items } = data;
 
   return (
     <Tbody>
-      {items.map((item) => (
+      {items.data.map((item) => (
         <Tr key={item.id}>
           <Td>{item.id}</Td>
           <Td>{item.title}</Td>
