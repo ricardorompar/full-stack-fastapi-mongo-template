@@ -39,7 +39,7 @@ export type ItemUpdate = {
 
 
 export type ItemsPublic = {
-	data: Array<ItemPublic>;
+	items: Array<ItemPublic>;
 	count: number;
 };
 
