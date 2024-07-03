@@ -100,6 +100,7 @@ async def update_item(
     # Remove the _id field from the update data if it exists
     item_update_data = item_update.dict(exclude_unset=True)
     item_update_data.pop("_id", None)
+    item_update_data.pop("id", None)
 
     for key, value in item_update_data.items():
         setattr(item, key, value)
