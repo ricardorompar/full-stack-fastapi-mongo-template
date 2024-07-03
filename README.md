@@ -6,9 +6,9 @@
 ## Technology Stack and Features
 
 - ⚡ [**FastAPI**](https://fastapi.tiangolo.com) for the Python backend API.
-    - 🧰 [SQLModel](https://sqlmodel.tiangolo.com) for the Python SQL database interactions (ORM).
+    - 🧰 [ODMantic](https://art049.github.io/odmantic/) for the Python SQL database interactions (ORM).
     - 🔍 [Pydantic](https://docs.pydantic.dev), used by FastAPI, for the data validation and settings management.
-    - 💾 [PostgreSQL](https://www.postgresql.org) as the SQL database.
+    - 💾 [MongoDB](https://www.mongodb.com) as the NoSQL database.
 - 🚀 [React](https://react.dev) for the frontend.
     - 💃 Using TypeScript, hooks, Vite, and other parts of a modern frontend stack.
     - 🎨 [Chakra UI](https://chakra-ui.com) for the frontend components.
