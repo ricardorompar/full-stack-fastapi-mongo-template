@@ -15,18 +15,10 @@ RUN npm run build
 
 
 # Stage 1, based on Nginx, to have only the compiled app, ready for production with Nginx
-#FROM nginx:1
+FROM nginx:1
 
-# Stage 1, based on Nginx, to have only the compiled app, ready for production with Nginx
-FROM nginx:alpine
-
-# Copy the built app from the previous stage
 COPY --from=build-stage /app/dist/ /usr/share/nginx/html
 
 COPY ./nginx.conf /etc/nginx/conf.d/default.conf
 COPY ./nginx-backend-not-found.conf /etc/nginx/extra-conf.d/backend-not-found.conf
 
-
-
-# This is not strictly necessary unless you have specific configurations
-# COPY ./nginx-backend-not-found.conf /etc/nginx/extra-conf.d/backend-not-found.conf
