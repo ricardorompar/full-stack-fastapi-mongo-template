@@ -1,11 +1,9 @@
-# This module connects to an SQL database.
-# Changes are required to switch from SQLModel to ODMantic (MongoDB).
+# This module connects to a MongoDB database using ODMantic.
 # It handles user authentication and authorization, ensuring that only authenticated users
 # can access certain resources and that only superusers have certain privileges.
 import logging
 from collections.abc import Generator
 from typing import Annotated
-
 import jwt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer

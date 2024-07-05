@@ -1,16 +1,13 @@
-# This module does not establish any SQL database connection.
-# changes required for the switch to ODMantic (MongoDB).
+# This module connects to a MongoDB database using ODMantic.
 # handles user authentication and password management
 
 from datetime import timedelta
 from typing import Annotated, Any
-
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import HTMLResponse
 from fastapi.security import OAuth2PasswordRequestForm
 
 from app import crud
-#from app.api.deps import CurrentUser, SessionDep, get_current_active_superuser
 from app.api.deps import CurrentUser, EngineDep, get_current_active_superuser
 from app.core import security
 from app.core.config import settings
@@ -24,7 +21,6 @@ from app.utils import (
 )
 
 router = APIRouter()
-
 
 @router.post("/login/access-token")
 async def login_access_token(
@@ -126,5 +122,3 @@ async def recover_password_html_content(email: str, engine: EngineDep) -> Any:
     return HTMLResponse(
         content=email_data.html_content, headers={"subject:": email_data.subject}
     )
-
-  

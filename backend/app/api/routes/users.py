@@ -1,11 +1,8 @@
-# This module connects to an SQL database.
-# Changes are required to switch from SQLModel to ODMantic (MongoDB).
+# This module connects to a MongoDB database using ODMantic.
 
 from typing import Any
-
 from fastapi import APIRouter, Depends, HTTPException
 
-# from sqlmodel import col, delete, func, select
 from odmantic import AIOEngine, ObjectId
 from fastapi import APIRouter, Depends, HTTPException, status
 
@@ -94,16 +91,12 @@ async def update_user_me(
             raise HTTPException(
                 status_code=409, detail="User with this email already exists"
             )
-    # user_data = user_in.model_dump(exclude_unset=True)
     user_data = user_in.dict(exclude_unset=True)
-    # current_user.sqlmodel_update(user_data)
-
     for key, value in user_data.items():
         setattr(current_user, key, value)
 
     await engine.save(current_user)
     current_user = await engine.find_one(User, User.id == current_user.id)
-
     return current_user
 
 
@@ -123,7 +116,6 @@ async def update_password_me(
     hashed_password = get_password_hash(body.new_password)
     current_user.hashed_password = hashed_password
     await engine.save(current_user)
-
     return Message(message="Password updated successfully")
 
 
@@ -161,7 +153,6 @@ async def delete_user_me(engine: EngineDep, current_user: CurrentUser) -> Any:
 
     await engine.remove(Item, Item.owner_id == current_user.id)
     await engine.delete(current_user)
-
     return Message(message="User deleted successfully")
 
 
@@ -181,17 +172,11 @@ async def register_user(engine: EngineDep, user_in: UserRegister) -> Any:
             status_code=400,
             detail="The user with this email already exists in the system",
         )
-    # user_create = UserCreate.model_validate(user_in)
-    # user = await crud.create_user(engine=engine, user_create=user_create)
-    # return user
+    
     user_create = UserCreate(**user_in.dict())
     user = User(**user_create.dict())
     await engine.save(user)
     return user
-
-
-# ... to be continued
-
 
 @router.get("/{user_id}", response_model=UserPublic)
 async def read_user_by_id(
@@ -225,7 +210,6 @@ async def update_user(
     """
     Update a user.
     """
-
     db_user = await engine.find_one(User, User.id == ObjectId(user_id))
     if not db_user:
         raise HTTPException(

@@ -79,7 +79,6 @@ async def create_item(
 @router.put("/{item_id}", response_model=ItemPublic)
 async def update_item(
     item_id: str,
-    # item_in: ItemUpdate,
     item_update: ItemUpdate,
     engine: AIOEngine = Depends(get_db),
     current_user: User = Depends(get_current_user),
@@ -95,9 +94,6 @@ async def update_item(
             status_code=403, detail="Not enough permissions to modify this item"
         )
 
-    # for key, value in item_in.dict(exclude_unset=True).items():
-    #     setattr(item, key, value)
-    # Remove the _id field from the update data if it exists
     item_update_data = item_update.dict(exclude_unset=True)
     item_update_data.pop("_id", None)
     item_update_data.pop("id", None)
