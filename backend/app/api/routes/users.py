@@ -125,7 +125,6 @@ async def read_users_me(current_user: CurrentUser) -> UserPublic:
     Get current user.
     """
     try:
-        logger.info(f"Current user: {current_user}")
         return UserPublic(
             email=current_user.email,
             is_active=current_user.is_active,
@@ -172,11 +171,12 @@ async def register_user(engine: EngineDep, user_in: UserRegister) -> Any:
             status_code=400,
             detail="The user with this email already exists in the system",
         )
-    
+
     user_create = UserCreate(**user_in.dict())
     user = User(**user_create.dict())
     await engine.save(user)
     return user
+
 
 @router.get("/{user_id}", response_model=UserPublic)
 async def read_user_by_id(
