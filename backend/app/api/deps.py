@@ -36,13 +36,10 @@ TokenDep = Annotated[str, Depends(reusable_oauth2)]
 
 async def get_current_user(engine: EngineDep, token: TokenDep) -> User:
     payload = None
-    logger.info(f"Validating token at {datetime.now(timezone.utc)}")
     try:
-        logger.info(f"Token printed : {token}")
         payload = jwt.decode(
             token, settings.SECRET_KEY, algorithms=[security.ALGORITHM]
         )
-        logger.info(f"Decoded payload: {payload}")
         token_data = TokenPayload(**payload)
     except (InvalidTokenError, ValidationError) as e:
         logger.error(f"Token validation error: {e}")
@@ -53,15 +50,11 @@ async def get_current_user(engine: EngineDep, token: TokenDep) -> User:
         )
     # new log
     except ValidationError as e:
-        logger.error(f"Token validation error: {e}")
-        logger.info(f"Decoded payload 2: {payload}")
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Could not validate credentials",
         )
     except jwt.ExpiredSignatureError:
-        logger.error("Signature has expired")
-        logger.info(f"Decoded payload 3: {payload}")
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Signature has expired",

@@ -17,14 +17,12 @@ emails = "^0.6"
 gunicorn = "^22.0.0"
 jinja2 = "^3.1.4"
 httpx = "^0.25.1"
-psycopg = {extras = ["binary"], version = "^3.1.13"}
-sqlmodel = "^0.0.16"
 bcrypt = "4.0.1"  # Pin bcrypt until passlib supports the latest
 pydantic-settings = "^2.2.1"
 sentry-sdk = {extras = ["fastapi"], version = "^1.40.6"}
 pyjwt = "^2.8.0"
-odmantic = "^1.0.1" # Add odmantic dependency
-motor =  "^3.4.0" # Add motor dependency
+odmantic = "^1.0.1" 
+motor =  "^3.4.0" 
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.4.3"
