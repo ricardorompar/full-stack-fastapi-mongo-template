@@ -4,7 +4,7 @@ FROM node:20 as build-stage
 WORKDIR /app
 
 COPY package*.json /app/
-
+EXPOSE 8080
 RUN npm install
 
 COPY ./ /app/
@@ -12,7 +12,7 @@ COPY ./ /app/
 ARG VITE_API_URL=${VITE_API_URL}
 
 RUN npm run build
-EXPOSE 8080
+
 
 
 # Stage 1, based on Nginx, to have only the compiled app, ready for production with Nginx
