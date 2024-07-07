@@ -20,8 +20,8 @@ services:
       - SMTP_PASSWORD=${SMTP_PASSWORD}
       - EMAILS_FROM_EMAIL=${EMAILS_FROM_EMAIL}
       - SENTRY_DSN=${SENTRY_DSN}
-      - MONGODB_URI=${MONGODB_URI} # new line
-      - MONGODB_DB=${MONGODB_DB} # new line
+      - MONGODB_URI=${MONGODB_URI}
+      - MONGODB_DB=${MONGODB_DB}
 
     build:
       context: ./backend

@@ -92,9 +92,9 @@ async def update_user_me(
                 status_code=409, detail="User with this email already exists"
             )
     user_data = user_in.dict(exclude_unset=True)
+
     for key, value in user_data.items():
         setattr(current_user, key, value)
-
     await engine.save(current_user)
     current_user = await engine.find_one(User, User.id == current_user.id)
     return current_user

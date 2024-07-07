@@ -42,8 +42,6 @@ async def get_current_user(engine: EngineDep, token: TokenDep) -> User:
         )
         token_data = TokenPayload(**payload)
     except (InvalidTokenError, ValidationError) as e:
-        logger.error(f"Token validation error: {e}")
-        logger.info(f"Decoded payload: {payload}")
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Could not validate credentials",
@@ -62,10 +60,8 @@ async def get_current_user(engine: EngineDep, token: TokenDep) -> User:
 
     user = await engine.find_one(User, User.id == ObjectId(token_data.sub))
     if not user:
-        logger.warning(f"User not found: {token_data.sub}")
         raise HTTPException(status_code=404, detail="User not found")
     if not user.is_active:
-        logger.warning(f"Inactive user: {user.id}")
         raise HTTPException(status_code=400, detail="Inactive user")
     return user
 
@@ -75,7 +71,6 @@ CurrentUser = Annotated[User, Depends(get_current_user)]
 
 async def get_current_active_superuser(current_user: CurrentUser) -> User:
     if not current_user.is_superuser:
-        logger.warning(f"User does not have superuser privileges: {current_user.id}")
         raise HTTPException(
             status_code=403, detail="The user doesn't have enough privileges"
         )
