@@ -97,7 +97,7 @@ async def update_user_me(
 
     await engine.save(current_user)
     current_user = await engine.find_one(User, User.id == current_user.id)
-    return current_user
+    return UserPublic(**current_user.dict(), public_id=current_user.id)
 
 
 @router.patch("/me/password", response_model=Message)
