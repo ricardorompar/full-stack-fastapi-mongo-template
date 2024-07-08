@@ -4,6 +4,17 @@
 
 - [Docker](https://www.docker.com/).
 - [Poetry](https://python-poetry.org/) for Python package and environment management.
+- [MongoDB_Atlas] (https://www.mongodb.com) for cloud-based database hosting and management.
+
+## MongoDB Atlas Setup
+
+1. Sign up for a free MongoDB Atlas account at https://www.mongodb.com/cloud/atlas/register
+2. Create a new cluster (the free tier is sufficient for development)
+3. In the cluster security settings, add your IP address to the IP whitelist
+4. Create a database user with read and write privileges
+5. Obtain your MongoDB connection string from the Atlas dashboard
+6. Add your MongoDB connection string to the `.env` file in the project root
+7. Add your database name to the `.env` file in the project root
 
 ## Local Development
 
@@ -20,8 +31,6 @@ Frontend, built with Docker, with routes handled based on the path: http://local
 Backend, JSON based web API based on OpenAPI: http://localhost/api/
 
 Automatic interactive documentation with Swagger UI (from the OpenAPI backend): http://localhost/docs
-
-Adminer, database web administration: http://localhost:8080
 
 Traefik UI, to see how the routes are being handled by the proxy: http://localhost:8090
 
