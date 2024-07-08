@@ -6,7 +6,7 @@
 ## Technology Stack and Features
 
 - ⚡ [**FastAPI**](https://fastapi.tiangolo.com) for the Python backend API.
-  - 🧰 [ODMantic](https://art049.github.io/odmantic/) for the Python SQL database interactions (ORM).
+  - 🧰 [ODMantic](https://art049.github.io/odmantic/) for the Python MongoDB database interactions (ODM).
   - 🔍 [Pydantic](https://docs.pydantic.dev), used by FastAPI, for the data validation and settings management.
   - 💾 [MongoDB](https://www.mongodb.com) as the NoSQL database.
 - 🚀 [React](https://react.dev) for the frontend.
