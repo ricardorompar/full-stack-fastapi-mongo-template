@@ -1,15 +1,12 @@
-# This module does not establish any SQL database connection.
-# No changes required for the switch to ODMantic (MongoDB).
+# This module connects to a MongoDB database using ODMantic.
 
 from fastapi import APIRouter, Depends
 from pydantic.networks import EmailStr
-
 from app.api.deps import get_current_active_superuser
 from app.models import Message
 from app.utils import generate_test_email, send_email
 
 router = APIRouter()
-
 
 @router.post(
     "/test-email/",

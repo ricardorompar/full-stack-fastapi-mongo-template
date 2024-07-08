@@ -6,8 +6,6 @@ from pydantic import EmailStr
 from pydantic import BaseModel
 
 
-# Shared properties
-# TODO replace email str with EmailStr when sqlmodel supports it
 class UserBase(Model):
     email: EmailStr = Field(unique=True, index=True)
     is_active: bool = True
@@ -15,26 +13,21 @@ class UserBase(Model):
     full_name: Optional[str] = None
 
 
-# Properties to receive via API on creation
 class UserCreate(UserBase):
     password: str
 
 
-# TODO replace email str with EmailStr when sqlmodel supports it
 class UserRegister(Model):
     email: EmailStr
     password: str
     full_name: Optional[str] = None
 
 
-# Properties to receive via API on update, all are optional
-# TODO replace email str with EmailStr when sqlmodel supports it
 class UserUpdate(UserBase):
-    email: Optional[EmailStr] = None  # type: ignore
+    email: Optional[EmailStr] = None
     password: Optional[str] = None
 
 
-# TODO replace email str with EmailStr when sqlmodel supports it
 class UserUpdateMe(Model):
     full_name: Optional[str] = None
     email: Optional[EmailStr] = None
@@ -45,23 +38,17 @@ class UpdatePassword(Model):
     new_password: str
 
 
-# Database model, database table inferred from class name
-class User(Model): #previously: class User(UserBase):
-    #Taking the UserBase attributes:
+class User(Model):
     email: EmailStr = Field(unique=True, index=True)
     is_active: bool = True
     is_superuser: bool = False
     full_name: Optional[str] = None
-    #Stuff that was already here:
-    #email: EmailStr
-    #This change is done so that we inherit the Model class directly 
     hashed_password: str
     items: List["Item"] = Field(default_factory=list)
 
 
-# Properties to return via API, id is always required
 class UserPublic(UserBase):
-    public_id: ObjectId #this is the type of ID that odmantic assigns
+    public_id: ObjectId
 
 
 class UsersPublic(Model):
@@ -69,44 +56,31 @@ class UsersPublic(Model):
     count: int
 
 
-# Shared properties
 class ItemBase(Model):
     title: str
     description: Optional[str] = None
 
 
-# Properties to receive on item creation
 class ItemCreate(ItemBase):
     title: str
 
 
-# Properties to receive on item update
 class ItemUpdate(ItemBase):
-    title: Optional[str] = None  # type: ignore
+    title: Optional[str] = None
 
 
-# Database model, database table inferred from class name
 class Item(Model):
-    #Directly passing the ItemBase attributes:
     title: str
     description: Optional[str] = None
-    #The rest
     title: str
-    owner: Optional[ObjectId] = Field(
-        default=None
-    )  
-    owner_id: ObjectId 
-    # this is supposed to reference to the user // other option: Optional[ObjectId] = Reference()
+    owner: Optional[ObjectId] = Field(default=None)
+    owner_id: ObjectId
 
 
-# Properties to return via API, id is always required
 class ItemPublic(Model):
-    #Directly passing the ItemBase attributes:
     title: str
     description: Optional[str] = None
-    #The rest
-    # itempublic_id: ObjectId #BEWARE
-    owner_id: ObjectId #also here
+    owner_id: ObjectId
 
 
 class ItemsPublic(BaseModel):
@@ -114,18 +88,15 @@ class ItemsPublic(BaseModel):
     count: int
 
 
-# Generic message
 class Message(Model):
     message: str
 
 
-# JSON payload containing access token
 class Token(Model):
     access_token: str
     token_type: str = "bearer"
 
 
-# Contents of JWT token
 class TokenPayload(Model):
     sub: Optional[str] = None
 
