@@ -53,7 +53,7 @@
 
 ## How To Use It
 
-You can **just fork or clone** this repository and use it as is.
+You can **just fork or clone** this repository and use it as is. After simply run `docker compose up -d` to start running the containers.
 
 ✨ It just works. ✨
 
